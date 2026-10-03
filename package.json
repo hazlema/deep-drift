@@ -1,0 +1,10 @@
+{
+  "name": "immiscible",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python3 -m http.server 5173 --bind 0.0.0.0",
+    "test": "node --test physics.test.js game.test.js"
+  }
+}

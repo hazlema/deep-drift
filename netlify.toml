@@ -1,0 +1,4 @@
+[build]
+  # Package only public assets; no dependencies or compilation required.
+  command = "mkdir -p dist && cp index.html app.js game.js physics.js renderer.js sound.js game.css playground.html playground.js style.css dist/"
+  publish = "dist"

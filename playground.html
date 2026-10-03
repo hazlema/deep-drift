@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#071923" />
+  <meta name="description" content="A little liquid playground. Stir suspended oil, split droplets, and watch their colors change." />
+  <title>Immiscible — a little liquid playground</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='20' fill='%23071923'/%3E%3Cpath d='M40 12C30 27 18 39 18 51a22 22 0 0044 0C62 39 50 27 40 12' fill='%23b9edb1'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="water" tabindex="0" aria-label="Interactive oil and water. Move your pointer to stir, press to split drops. With keyboard focus, use arrow keys to stir and Enter to split."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header>
+    <a class="wordmark" href="./" aria-label="Immiscible home"><svg viewBox="0 0 24 30" aria-hidden="true"><path d="M12 2C8 9 2 14 2 20a10 10 0 0020 0C22 14 16 9 12 2Z"/><path d="M6 20a6 6 0 006 6"/></svg>immiscible<span>®</span></a>
+    <div class="top-note">A little liquid playground</div>
+    <button id="hide" class="icon-button" aria-label="Hide controls for an immersive view" title="Hide controls (H)"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
+  </header>
+  <main class="intro">
+    <div class="eyebrow"><span></span> Oil & water, endlessly curious.</div>
+    <h1>Go with<br>your flow.</h1>
+    <p>Stir a little. Break things apart.<br>See what colors come out.</p>
+  </main>
+  <aside class="readout" aria-label="Simulation status"><span class="live-dot"></span><span id="state">Suspended</span><span class="readout-line"></span><span id="count">24 droplets</span></aside>
+  <div class="bottom-area">
+    <div class="gesture-hints"><span><svg viewBox="0 0 24 24"><path d="M9 3h6a4 4 0 014 4v10a7 7 0 01-14 0V7a4 4 0 014-4Z"/><path d="M12 3v6"/></svg>Move to stir</span><span><svg viewBox="0 0 24 24"><path d="m12 2 2 6 6-2-3 6 5 4-7 1-3 6-3-6-7-1 5-4-3-6 6 2Z"/></svg>Press to split & recolor</span></div>
+    <section class="controls" aria-label="Playground controls">
+      <div class="palette-control"><span class="control-label">Color mood</span><div class="swatches" role="group" aria-label="Color mood"><button class="swatch selected" data-palette="0" aria-label="Opal color mood" aria-pressed="true" title="Opal"></button><button class="swatch" data-palette="1" aria-label="Sunset color mood" aria-pressed="false" title="Sunset"></button><button class="swatch" data-palette="2" aria-label="Lagoon color mood" aria-pressed="false" title="Lagoon"></button></div></div>
+      <div class="divider"></div>
+      <label class="flow-control"><span class="control-label">Current <span id="flow-label">Gentle</span></span><input id="flow" type="range" min="0" max="100" value="35" aria-label="Current strength" /></label>
+      <div class="divider"></div>
+      <button id="pause" class="action-button" aria-label="Pause simulation" title="Pause (Space)"><svg id="pause-icon" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg><span>Pause</span></button>
+      <button id="reset" class="action-button" title="Start fresh (R)"><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 111 8M4 4v6h6"/></svg><span>Start fresh</span></button>
+    </section>
+    <footer><span>Never quite the same twice.</span><span>Made for getting a little lost.</span></footer>
+  </div>
+  <button id="restore" class="icon-button" aria-label="Show controls" title="Show controls (H)"><svg viewBox="0 0 24 24"><path d="M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5"/></svg></button>
+  <div id="fallback" hidden>Your browser couldn’t start the liquid renderer. Try enabling hardware acceleration and reload.</div>
+  <script type="module" src="playground.js"></script>
+</body>
+</html>
