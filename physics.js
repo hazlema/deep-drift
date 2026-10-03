@@ -60,7 +60,7 @@ export class Liquid {
     for(let i=0;i<this.drops.length;i++)for(let j=i+1;j<this.drops.length;j++){
       const a=this.drops[i],b=this.drops[j];
       const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);
-      if(a.cool>0||b.cool>0||dist>=(a.r+b.r)*.9)continue;
+      if(a.boss||b.boss||a.cool>0||b.cool>0||dist>=(a.r+b.r)*.9)continue;
       const aa=a.r*a.r,bb=b.r*b.r,total=aa+bb;
       if(this.random()<.5){
         // The larger blob absorbs the smaller one's oil and momentum.

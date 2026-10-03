@@ -30,6 +30,9 @@ export class FlightSound {
  }
  play(event){
   switch(event){
+   case 'boss-hit':this.tone(360,95,.12,.18,'triangle');break;
+   case 'boss':this.tone(110,55,.7,.2,'triangle');this.tone(165,82,.65,.1,'sine',.15);break;
+   case 'gameover':this.tone(180,60,.8,.17);break;
    case 'pickup':this.tone(440,880,.25,.18);this.tone(660,990,.25,.12,'sine',.1);break;
    case 'nuke':this.splash(.65,.65);this.tone(240,28,.65,.28);break;
    case 'launch':this.tone(180,360,.35,.18);this.tone(360,540,.4,.12,'sine',.12);break;

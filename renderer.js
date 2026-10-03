@@ -1,7 +1,7 @@
 import {MAX_DROPS} from './physics.js';
 const vertex=`attribute vec2 position; void main(){gl_Position=vec4(position,0.,1.);}`;
 const fragment=`precision highp float;
-uniform vec2 resolution; uniform vec2 viewport; uniform float time; uniform vec4 drops[48]; uniform int count; uniform int palette; uniform vec3 ripple;
+uniform vec4 impact; uniform vec2 resolution; uniform vec2 viewport; uniform float time; uniform vec4 drops[48]; uniform int count; uniform int palette; uniform vec3 ripple;
 vec3 color(float h){
  if(palette==1)return .62+.32*cos(6.28318*(h*.45+vec3(.02,.19,.31)));
  if(palette==2)return .58+.30*cos(6.28318*(h*.4+vec3(.48,.10,.02)));
@@ -59,6 +59,7 @@ void main(){
   body+=vec3(.83,.95,.87)*crescent*.66;
   float reflected=pow(max(0.,dot(n,normalize(vec3(.8,.6,.25)))),14.);
   body+=film*reflected*.45;
+  vec2 hit=(p-impact.xy)/max(impact.z,1.);body+=vec3(.65,.4,.24)*impact.w*exp(-2.*dot(hit,hit));
   bg=mix(bg,body,smoothstep(edge-aa,edge+aa,f));
  }
  // Suspended pinpricks of light, sparse and nearly still.
@@ -76,14 +77,17 @@ export class WaterRenderer {
   const program=gl.createProgram();gl.attachShader(program,compile(gl.VERTEX_SHADER,vertex));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));gl.useProgram(program);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
   const pos=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  this.u=Object.fromEntries(['resolution','viewport','time','drops','count','palette','ripple'].map(n=>[n,gl.getUniformLocation(program,n)]));this.packed=new Float32Array(MAX_DROPS*4);
+  this.u=Object.fromEntries(['resolution','viewport','time','drops','count','palette','ripple','impact'].map(n=>[n,gl.getUniformLocation(program,n)]));this.packed=new Float32Array(MAX_DROPS*4);
  }
- draw(drops,camera,time){
+ draw(drops,camera,time,reduced=false){
   const {gl,canvas,u}=this;const ratio=Math.min(devicePixelRatio,1.5,1500/innerWidth);
   const width=Math.round(innerWidth*ratio),height=Math.round(innerHeight*ratio);
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);}
   const visible=drops.filter(d=>d.y+d.r>camera.y-80&&d.y-d.r<camera.y+camera.h+80&&d.x+d.r>camera.x-80&&d.x-d.r<camera.x+camera.w+80);
   visible.forEach((d,i)=>this.packed.set([d.x-camera.x,d.y-camera.y,d.r,d.hue],i*4));
+  const boss=visible.find(d=>d.boss);
+  const flash=boss&&!reduced?Math.max(0,1-(time-(boss.hitAt??-10))/.18):0;
+  gl.uniform4f(u.impact,boss?boss.x-camera.x:0,boss?boss.y-camera.y:0,boss?.r||1,flash);
   gl.uniform2f(u.resolution,width,height);gl.uniform2f(u.viewport,camera.w,camera.h);gl.uniform1f(u.time,time);gl.uniform4fv(u.drops,this.packed);gl.uniform1i(u.count,visible.length);gl.uniform1i(u.palette,0);gl.uniform3f(u.ripple,-500,-500,-10);gl.drawArrays(gl.TRIANGLES,0,6);
  }
 }
