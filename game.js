@@ -1,5 +1,5 @@
 import {Liquid} from './physics.js';
-export const WORLD={width:1100,height:4800,startY:4470,finishY:3300};
+export const WORLD={width:1100,height:4800,startY:4470,finishY:220};
 export function oilField(drops,x,y,time){
  let field=0;
  for(const d of drops){const vx=(x-d.x)/d.r,vy=(y-d.y)/d.r;if(vx*vx+vy*vy>9)continue;const angle=Math.atan2(vy,vx),phase=d.hue*Math.PI*2+time*.13;field+=Math.exp(-2*(vx*vx+vy*vy)*(1+.16*Math.sin(2*angle+phase)+.11*Math.sin(3*angle-phase)));}

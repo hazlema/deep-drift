@@ -35,9 +35,17 @@ function draw(){
   }
   if(warning){ctx.strokeStyle='#e8be8666';ctx.beginPath();ctx.arc(d.x,d.y,d.r*1.08,game.time*3,game.time*3+2);ctx.stroke();}
  }
- // Exit gate spans a deliberate opening, not the whole course.
- ctx.shadowColor='#b8f1c5';ctx.shadowBlur=18;line(370,WORLD.finishY,730,WORLD.finishY,'#c9ffd6',4);line(370,WORLD.finishY-40,370,WORLD.finishY+40,'#c9ffd6',5);line(730,WORLD.finishY-40,730,WORLD.finishY+40,'#c9ffd6',5);ctx.shadowBlur=0;
- ctx.fillStyle='#c5eed0';ctx.textAlign='center';ctx.font='14px "DM Sans",sans-serif';ctx.fillText('Clear water / Exit',550,WORLD.finishY-50);
+ // The striped tape marks the same opening used by the finish trigger.
+ const finishY=WORLD.finishY;
+ line(370,finishY-38,370,finishY+38,'#c7c8bd',4);line(730,finishY-38,730,finishY+38,'#c7c8bd',4);
+ ctx.save();ctx.shadowColor='#edbf5460';ctx.shadowBlur=12;
+ ctx.fillStyle='#f5d34d';ctx.fillRect(370,finishY-12,360,24);ctx.shadowBlur=0;
+ ctx.beginPath();ctx.rect(370,finishY-12,360,24);ctx.clip();ctx.fillStyle='#ce343c';
+ for(let x=338;x<750;x+=40){ctx.beginPath();ctx.moveTo(x,finishY+12);ctx.lineTo(x+20,finishY+12);ctx.lineTo(x+44,finishY-12);ctx.lineTo(x+24,finishY-12);ctx.closePath();ctx.fill();}
+ ctx.restore();line(370,finishY-12,730,finishY-12,'#ffe998',1);line(370,finishY+12,730,finishY+12,'#a85b33',1);
+ ctx.fillStyle='#f5d34d';ctx.fillRect(507,finishY-12,86,24);
+ ctx.fillStyle='#342a20';ctx.textAlign='center';ctx.font='700 12px "DM Sans",sans-serif';ctx.fillText('FINISH',550,finishY+4);
+ ctx.fillStyle='#f4d685';ctx.font='14px "DM Sans",sans-serif';ctx.fillText('Cross the finish line',550,finishY-52);
  if(game.state==='ready'){ctx.fillStyle='#92bfb3';ctx.font='10px "DM Sans",sans-serif';ctx.fillText('Your spacecraft',550,WORLD.startY+46);}
  for(const b of game.bolts){const len=Math.hypot(b.vx,b.vy);ctx.shadowColor='#9cf9dc';ctx.shadowBlur=12;line(b.x-b.vx/len*27,b.y-b.vy/len*27,b.x,b.y,'#d4ffbd',2.5);}ctx.shadowBlur=0;
  for(const p of game.sparks){ctx.globalAlpha=p.life/(p.maxLife||.4);ctx.fillStyle='#defbd0';ctx.fillRect(p.x,p.y,3,3);}ctx.globalAlpha=1;
@@ -60,14 +68,14 @@ function draw(){
  const s=game.ship;ctx.save();ctx.translate(s.x+(menu?Math.sin(visualTime*.55)*5:0),s.y+(menu?Math.sin(visualTime*.8)*7:0));ctx.rotate(s.angle+Math.PI/2+(menu?Math.sin(visualTime*.4)*.04:0));const shrink=game.state==='dying'?Math.max(.03,1-game.deathTime):1;ctx.scale(shrink,shrink);
  if(game.thrust&&game.state==='playing'){const flame=paused||reduced?22:20+Math.sin(game.time*57)*7;ctx.fillStyle='#a6f7d780';ctx.beginPath();ctx.moveTo(-6,13);ctx.lineTo(0,13+flame);ctx.lineTo(6,13);ctx.fill();ctx.fillStyle='#e3ffe4';ctx.beginPath();ctx.moveTo(-3,13);ctx.lineTo(0,27);ctx.lineTo(3,13);ctx.fill();}
  ctx.shadowColor='#bcecd2';ctx.shadowBlur=12;ctx.strokeStyle='#e2f9e7';ctx.lineWidth=1.5;ctx.fillStyle='#578e91';ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(14,16);ctx.lineTo(0,10);ctx.lineTo(-14,16);ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#e9f8c4';ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(4,5);ctx.lineTo(-4,5);ctx.fill();line(-11,0,-11,-8,'#d4ebcd',2);line(11,0,11,-8,'#d4ebcd',2);ctx.restore();
- if(game.state==='playing'&&s.y>camera.y+100){ctx.fillStyle='#bfe9ca77';ctx.font='10px "DM Sans",sans-serif';ctx.fillText('↑ Exit',Math.max(camera.x+80,Math.min(camera.x+camera.w-80,550)),camera.y+100);}
+ if(game.state==='playing'&&s.y>camera.y+100){ctx.fillStyle='#bfe9ca77';ctx.font='10px "DM Sans",sans-serif';ctx.fillText('↑ Finish',Math.max(camera.x+80,Math.min(camera.x+camera.w-80,550)),camera.y+100);}
  ctx.textAlign='left';
 }
 function timeText(t){return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;}
 function updateUI(){
  $('#nuke').disabled=game.nukes<1||game.state!=='playing'||paused;$('#nuke').textContent=`N · Nuke (${game.nukes}/3)`;
  $('#attempt').textContent=String(game.attempt).padStart(2,'0');$('#time').textContent=timeText(game.time);$('#cuts').textContent=game.cuts;$('#score').textContent=game.score.toLocaleString();$('#intensity').textContent=`${game.intensity.toFixed(1)}× current`;$('#progress').style.height=`${game.progress*100}%`;$('#distance').textContent=`${Math.max(0,Math.round(WORLD.startY-WORLD.finishY-(WORLD.startY-game.ship.y))).toLocaleString()} m`;
- const state=paused?'paused':game.state;if(state!==lastState){lastState=state;$('#notice').textContent=state==='dying'?'Caught in the oil. Trying again…':state==='paused'?'Flight paused':'';$('#status').textContent=state==='ready'?'Flight systems ready':state==='won'?'Exit reached':state==='dying'?'Hull captured':state==='paused'?'Holding position':'Find your way to clear water';}
+ const state=paused?'paused':game.state;if(state!==lastState){lastState=state;$('#notice').textContent=state==='dying'?'Caught in the oil. Trying again…':state==='paused'?'Flight paused':'';$('#status').textContent=state==='ready'?'Flight systems ready':state==='won'?'Finish reached':state==='dying'?'Hull captured':state==='paused'?'Holding position':'Find your way to clear water';}
  if(game.state==='won'){$('#result').hidden=false;document.body.classList.remove('running');$('#result-text').textContent=`${game.score.toLocaleString()} points. ${timeText(game.time)} in the current. ${game.cuts} oil splits. Run ${game.attempt}.`;$('#pause').disabled=true;}
 }
 function start(){nukeRequested=false;sound.setPaused(false);sound.unlock().then(ready=>{if(ready)sound.play('launch');});game.start();paused=false;document.body.classList.remove('paused');keys.clear();touch.clear();$('#brief').hidden=true;$('#result').hidden=true;document.body.classList.add('running');$('#pause').disabled=false;$('#pause').innerHTML='Ⅱ <span>Pause</span>';$('#pause').setAttribute('aria-label','Pause game');canvas.focus();updateUI();}

@@ -8,7 +8,7 @@ Run `npm run dev` and open http://localhost:5173. No dependencies or build step 
 
 ## Deep Drift
 
-Launch, then reach the mint-green exit gate 1,170 meters ahead, within the active oil field.
+Launch, then cross the red-and-yellow striped finish tape 4,250 meters ahead, at the original end of the course.
 
 - **W / Up:** thrust
 - **A, D / Left, Right:** turn
