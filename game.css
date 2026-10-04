@@ -22,3 +22,6 @@
 @media(max-width:700px){.telemetry{gap:18px}.telemetry div:last-child{display:none}#wide-status{top:133px;left:22px;font-size:10px}#boss-hud{left:22px;top:178px;width:165px;font-size:11px}body:has(#boss-hud:not([hidden])) #wide-status{top:133px}.brief-note{font-size:9px}}
 
 #boss-feedback{font-size:10px;color:#d6bac9}
+#hull{width:90px;height:7px;margin-top:8px;border:none;border-radius:6px;overflow:hidden;background:#24403f;accent-color:#bff0d3}
+#hull::-webkit-progress-bar{background:#24403f}#hull::-webkit-progress-value{background:#bff0d3}#hull::-moz-progress-bar{background:#bff0d3}
+#hull.low{accent-color:#ff8f86}#hull.low::-webkit-progress-value{background:#ff8f86}#hull.low::-moz-progress-bar{background:#ff8f86}

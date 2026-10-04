@@ -76,18 +76,31 @@ function draw(){
     ctx.strokeStyle='#ffd6c3';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();
    }
    ctx.restore();
-   // Three outward marks signal shedding; no surrounding shield-like ring.
-   if(boss.nextPulse-game.time<1){
-    const toward=Math.atan2(game.ship.y-boss.y,game.ship.x-boss.x);
-    for(const offset of [-.7,0,.7]){const a=toward+offset,x=boss.x+Math.cos(a)*(boss.r+22),y=boss.y+Math.sin(a)*(boss.r+22);
-     ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.strokeStyle='#f2bd82';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(3,0);ctx.lineTo(-5,5);ctx.stroke();ctx.restore();
+   // Telegraphs: a locked lane before a charge, a tightening ring before a burst.
+   const k=boss.attack;
+   if(k?.kind==='charge'){
+    const a=Math.atan2(k.y-boss.y,k.x-boss.x),pulse=k.dash||reduced?1:.55+.45*Math.sin(game.time*22);
+    ctx.globalAlpha=pulse;ctx.setLineDash([10,10]);line(boss.x,boss.y,k.x,k.y,'#ff9b8a',2);ctx.setLineDash([]);
+    ctx.strokeStyle='#ff9b8a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(k.x,k.y,boss.r*.8,0,Math.PI*2);ctx.stroke();
+    for(const step of [0,16,32]){const x=boss.x+Math.cos(a)*(boss.r+14+step),y=boss.y+Math.sin(a)*(boss.r+14+step);
+     ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(-6,-8);ctx.lineTo(4,0);ctx.lineTo(-6,8);ctx.stroke();ctx.restore();
     }
+    ctx.globalAlpha=1;
+   }else if(k){
+    const t=Math.max(0,Math.min(1,(k.at-game.time)/.7));
+    ctx.strokeStyle='#ff9b8a';ctx.lineWidth=2;ctx.globalAlpha=1-t*.6;ctx.beginPath();ctx.arc(boss.x,boss.y,boss.r*(.85+t*.5),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
    }
   }
  }
+ // Mini blobs glow just before they fire.
+ if(!menu)for(const d of game.liquid.drops){
+  if(d.nextShot===undefined||d.nextShot-game.time>.5)continue;
+  ctx.strokeStyle='#ff8f86';ctx.lineWidth=2;ctx.globalAlpha=Math.min(1,Math.max(.2,1-(d.nextShot-game.time)*2));ctx.beginPath();ctx.arc(d.x,d.y,d.r*.75,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+ }
  ctx.textAlign='center';
  if(game.state==='ready'){ctx.fillStyle='#92bfb3';ctx.font='10px "DM Sans",sans-serif';ctx.fillText('Your spacecraft',550,WORLD.startY+46);}
- for(const b of game.bolts){const len=Math.hypot(b.vx,b.vy);ctx.shadowColor='#9cf9dc';ctx.shadowBlur=12;line(b.x-b.vx/len*27,b.y-b.vy/len*27,b.x,b.y,'#d4ffbd',2.5);}ctx.shadowBlur=0;
+ for(const b of game.bolts){const len=Math.hypot(b.vx,b.vy);ctx.shadowColor='#9cf9dc';ctx.shadowBlur=12;line(b.x-b.vx/len*27,b.y-b.vy/len*27,b.x,b.y,'#d4ffbd',2.5);}
+ for(const b of game.enemyBolts){const len=Math.hypot(b.vx,b.vy);ctx.shadowColor='#ff6f6a';ctx.shadowBlur=12;line(b.x-b.vx/len*16,b.y-b.vy/len*16,b.x,b.y,'#ffb3a6',3.5);}ctx.shadowBlur=0;
  for(const p of game.sparks){ctx.globalAlpha=p.life/(p.maxLife||.4);ctx.fillStyle=p.color||'#defbd0';ctx.fillRect(p.x,p.y,3,3);}ctx.globalAlpha=1;
  ctx.font='600 18px \"DM Sans\",sans-serif';ctx.fillStyle='#e6ffd0';for(const p of game.popups){ctx.globalAlpha=Math.min(1,p.life*2);ctx.fillText(p.text||'+100',p.x,p.y);}ctx.globalAlpha=1;
  for(const b of game.powerups){
@@ -119,7 +132,9 @@ function draw(){
  if(game.blast){const t=1-game.blast.life/.65;ctx.globalAlpha=(1-t)*.65;ctx.strokeStyle='#b9eaff';ctx.lineWidth=reduced?1:5*(1-t);ctx.beginPath();ctx.arc(game.blast.x,game.blast.y,game.blast.radius*(reduced?.7:t),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
  const s=game.ship;ctx.save();ctx.translate(s.x+(menu?Math.sin(visualTime*.55)*5:0),s.y+(menu?Math.sin(visualTime*.8)*7:0));ctx.rotate(s.angle+Math.PI/2+(menu?Math.sin(visualTime*.4)*.04:0));const shrink=game.state==='dying'?Math.max(.03,1-game.deathTime):1;ctx.scale(shrink,shrink);
  if(game.thrust&&game.state==='playing'){const flame=paused||reduced?22:20+Math.sin(game.time*57)*7;ctx.fillStyle='#a6f7d780';ctx.beginPath();ctx.moveTo(-6,13);ctx.lineTo(0,13+flame);ctx.lineTo(6,13);ctx.fill();ctx.fillStyle='#e3ffe4';ctx.beginPath();ctx.moveTo(-3,13);ctx.lineTo(0,27);ctx.lineTo(3,13);ctx.fill();}
- ctx.shadowColor='#bcecd2';ctx.shadowBlur=12;ctx.strokeStyle='#e2f9e7';ctx.lineWidth=1.5;ctx.fillStyle='#578e91';ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(14,16);ctx.lineTo(0,10);ctx.lineTo(-14,16);ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#e9f8c4';ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(4,5);ctx.lineTo(-4,5);ctx.fill();line(-11,0,-11,-8,'#d4ebcd',2);line(11,0,11,-8,'#d4ebcd',2);ctx.restore();
+ // A struck hull blinks red for a moment.
+ const hurt=game.state==='playing'&&game.time-game.hullHitAt<.45;if(hurt&&!reduced&&Math.floor(game.time*18)%2)ctx.globalAlpha=.3;
+ ctx.shadowColor=hurt?'#ff6f6a':'#bcecd2';ctx.shadowBlur=12;ctx.strokeStyle=hurt?'#ffd0c8':'#e2f9e7';ctx.lineWidth=1.5;ctx.fillStyle=hurt?'#b5524f':'#578e91';ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(14,16);ctx.lineTo(0,10);ctx.lineTo(-14,16);ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#e9f8c4';ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(4,5);ctx.lineTo(-4,5);ctx.fill();line(-11,0,-11,-8,'#d4ebcd',2);line(11,0,11,-8,'#d4ebcd',2);ctx.restore();
  if(game.state==='playing'&&game.phase==='level'&&s.y>camera.y+100){ctx.fillStyle='#bfe9ca77';ctx.font='10px "DM Sans",sans-serif';ctx.fillText(game.phase==='boss'?'Super Blob ↑':'↑ Finish',Math.max(camera.x+80,Math.min(camera.x+camera.w-80,game.boss?.x||550)),camera.y+100);}
  ctx.textAlign='left';
 }
@@ -136,18 +151,18 @@ function updateUI(){
  }
  lastRenderedState=game.state;
  $('#nuke').disabled=game.nukes<1||game.state!=='playing'||paused;$('#nuke').textContent=`N · Nuke (${game.nukes}/3)`;
- $('#lives').textContent=`${game.lives}/3`;$('#attempt').textContent=String(game.level).padStart(2,'0');$('#time').textContent=timeText(game.time);$('#cuts').textContent=game.cuts;$('#score').textContent=game.score.toLocaleString();
+ $('#lives').textContent=`${game.lives}/3`;$('#hull').value=game.health;$('#hull').classList.toggle('low',game.health<=25);$('#hull').setAttribute('aria-valuetext',`${game.health}% hull`);$('#attempt').textContent=String(game.level).padStart(2,'0');$('#time').textContent=timeText(game.time);$('#cuts').textContent=game.cuts;$('#score').textContent=game.score.toLocaleString();
  $('#wide-status').hidden=game.wideRemaining<=0;$('#wide-status').textContent=`Wide shot · ${Math.ceil(game.wideRemaining)}s`;
  $('#intensity').textContent=`${game.intensity.toFixed(1)}× current`;
  const boss=game.phase==='boss';$('#route-label').textContent=boss?'Boss':'Finish';$('#progress').style.height=`${(boss?1-game.boss.hp/game.boss.maxHp:game.progress)*100}%`;
  $('#distance').textContent=boss?`${game.boss.hp} HP`:`${Math.max(0,Math.round(game.ship.y-WORLD.finishY)).toLocaleString()} m`;
  $('#boss-hud').hidden=!boss||ready;$('#boss-health').value=game.boss?.hp||0;$('#boss-health').max=game.boss?.maxHp||60;
- $('#boss-feedback').textContent=game.boss?(game.boss.nextPulse-game.time<1?'Shedding oil…':`${game.boss.hp} / ${game.boss.maxHp} · Lasers damage the core`):'';
+ $('#boss-feedback').textContent=game.boss?(game.boss.attack?.kind==='charge'?'Charging — move!':game.boss.attack?'Ring burst incoming…':`${game.boss.hp} / ${game.boss.maxHp} · Every hit sheds armed oil`):'';
  $('#boss-health').setAttribute('aria-valuetext',`${game.boss?.hp||0} health remaining`);
  const state=paused?'paused':game.state,transition=game.transition?.kind;
- const stateKey=`${state}/${transition||''}/${game.phase}/${game.lives}`;
+ const stateKey=`${state}/${transition||''}/${game.phase}/${game.lives}/${game.shot}`;
  if(stateKey!==lastState){lastState=stateKey;
-  $('#notice').textContent=state==='dying'?(game.lives?`Caught in the oil. ${game.lives} ${game.lives===1?'life':'lives'} left…`:'Last life lost…'):state==='paused'?'Flight paused':state==='transition'?(transition==='boss'?'Super Blob\nBreak it down. Stay alive.':`Super Blob defeated
+  $('#notice').textContent=state==='dying'?(game.lives?`${game.shot?'Hit by laser fire':'Caught in the oil'}. ${game.lives} ${game.lives===1?'life':'lives'} left…`:'Last life lost…'):state==='paused'?'Flight paused':state==='transition'?(transition==='boss'?'Super Blob\nBreak it down. Stay alive.':`Super Blob defeated
 Level ${game.level+1} ahead`):'';
   $('#status').textContent=ready?'Flight systems ready':state==='dying'?'Hull captured':state==='paused'?'Holding position':state==='transition'?'Entering the next encounter':boss?'Defeat Super Blob':'Find your way to clear water';
  }
@@ -160,7 +175,10 @@ function updateSoundButton(){const b=$('#sound');b.textContent=sound.muted?'Soun
 $('#sound').onclick=()=>{sound.setMuted(!sound.muted);if(!sound.muted)sound.unlock();updateSoundButton();canvas.focus();};updateSoundButton();
 $('#nuke').onclick=()=>{if(!paused&&game.state==='playing')nukeRequested=true;canvas.focus();};
 const controlled=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD','KeyN'];
-addEventListener('keydown',e=>{if(e.target.closest('button,a'))return;if(controlled.includes(e.code))e.preventDefault();keys.add(e.code);if(e.repeat)return;if(e.code==='KeyP'||e.code==='Escape')pause();if(e.code==='KeyR')start();if(e.code==='KeyN'&&!paused&&game.state==='playing')nukeRequested=true;if(e.code==='Enter'&&(game.state==='ready'||game.state==='won'))start();});
+addEventListener('keydown',e=>{if(e.target.closest('button,a'))return;if(controlled.includes(e.code))e.preventDefault();keys.add(e.code);if(e.repeat)return;if(e.code==='KeyP'||e.code==='Escape')pause();if(e.code==='KeyR')start();
+ // TEMPORARY testing shortcut: B jumps straight to the boss. Remove before release.
+ if(e.code==='KeyB'){if(game.state==='ready')start();game.beginBoss();paused=false;sound.setPaused(false);document.body.classList.remove('paused');}
+ if(e.code==='KeyN'&&!paused&&game.state==='playing')nukeRequested=true;if(e.code==='Enter'&&(game.state==='ready'||game.state==='won'))start();});
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>{keys.clear();touch.clear();if(!paused&&['playing','dying','transition'].includes(game.state))pause();});document.addEventListener('visibilitychange',()=>{if(document.hidden&&!paused&&['playing','dying','transition'].includes(game.state))pause();last=performance.now();});
 for(const button of document.querySelectorAll('[data-action]')){button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);touch.add(button.dataset.action);button.classList.add('active');});const release=()=>{touch.delete(button.dataset.action);button.classList.remove('active');};button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);}
 function input(){return {nuke:nukeRequested,view:{...camera},thrust:keys.has('KeyW')||keys.has('ArrowUp')||touch.has('thrust'),left:keys.has('KeyA')||keys.has('ArrowLeft')||touch.has('left'),right:keys.has('KeyD')||keys.has('ArrowRight')||touch.has('right'),brake:keys.has('KeyS')||keys.has('ArrowDown')||touch.has('brake'),fire:keys.has('Space')||touch.has('fire')};}
